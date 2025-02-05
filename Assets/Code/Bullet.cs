@@ -1,3 +1,4 @@
+using System;
 using Unity.Cinemachine;
 using UnityEngine;
 
@@ -48,8 +49,12 @@ public class Bullet : MonoBehaviour
         }
 
     }
-    
-    
-    
-    
+
+    private void OnTriggerExit2D(Collider2D other)
+    {
+        if (other.CompareTag("Area")) {
+            rigid.linearVelocity = Vector2.zero;
+            gameObject.SetActive(false);
+        }
+    }
 }
