@@ -1,8 +1,10 @@
 using System.Collections;
+using UnityEditor.Experimental;
 using UnityEngine;
+using UnityEngine.UI;
 
-public class Enemy : MonoBehaviour
-{
+public class Enemy : MonoBehaviour {
+    public Spawner spawner;
     public float speed;
     public float health;
     public float maxHealth;
@@ -10,16 +12,14 @@ public class Enemy : MonoBehaviour
     public Rigidbody2D target;
 
     bool isLive;
-    
+
     Rigidbody2D rigid;
     Collider2D col;
     SpriteRenderer sprite;
     Animator animator;
     WaitForFixedUpdate wait;
     
-    
-    void Awake()
-    {
+    void Awake() {
         rigid = GetComponent<Rigidbody2D>();
         col = GetComponent<Collider2D>();
         sprite = GetComponent<SpriteRenderer>();
@@ -27,23 +27,20 @@ public class Enemy : MonoBehaviour
         wait = new WaitForFixedUpdate();
     }
 
-    private void FixedUpdate()
-    {   
+    private void FixedUpdate() {
         if (!isLive || animator.GetCurrentAnimatorStateInfo(0).IsName("Hit")) return;
-        
+
         Vector2 dirVec = target.position - rigid.position;
         Vector2 nextVec = dirVec.normalized * speed * Time.fixedDeltaTime;
         rigid.MovePosition(rigid.position + nextVec);
         rigid.linearVelocity = Vector2.zero;
     }
 
-    private void LateUpdate()
-    {
+    private void LateUpdate() {
         sprite.flipX = target.position.x < rigid.position.x;
     }
 
-    private void OnEnable()
-    {
+    private void OnEnable() {
         target = GameManager.instance.player.GetComponent<Rigidbody2D>();
         isLive = true;
         col.enabled = true;
@@ -53,8 +50,7 @@ public class Enemy : MonoBehaviour
         health = maxHealth;
     }
 
-    public void Init(SpawnData data)
-    {
+    public void Init(SpawnData data) {
         animator.runtimeAnimatorController = animCon[data.spriteType];
         speed = data.speed;
         maxHealth = data.health;
@@ -62,13 +58,12 @@ public class Enemy : MonoBehaviour
     }
 
 
-    private void OnTriggerEnter2D(Collider2D collision)
-    {
+    private void OnTriggerEnter2D(Collider2D collision) {
         if (!collision.CompareTag("Bullet") || !isLive) return;
 
         health -= collision.GetComponent<Bullet>().damage;
         StartCoroutine(KnockBack());
-        
+
 
         if (health > 0) {
             // .. Live, Hit Action
@@ -87,20 +82,20 @@ public class Enemy : MonoBehaviour
     }
 
     //생명 주기와 비동기처럼 실행되는 함수
-    IEnumerator KnockBack()
-    {
+    IEnumerator KnockBack() {
         // yield return null; // 1프레임 쉬기 
         // yield return new WaitForSeconds(2f); // 2초 쉬기
-        
+
         //하나의 물리 프레임을 딜레이
         yield return wait;
         Vector3 playerPos = GameManager.instance.player.transform.position;
         Vector3 dir = transform.position - playerPos;
         rigid.AddForce(dir.normalized * 3, ForceMode2D.Impulse);
     }
-    
-    void Dead()
-    {
+
+    void Dead() {
+        spawner.enemyCount--;
+        spawner.text.text = string.Format("count:{0}", spawner.enemyCount);
         gameObject.SetActive(false);
     }
 }

@@ -1,18 +1,16 @@
 using UnityEngine;
 using Random = UnityEngine.Random;
 
-public class RePosition : MonoBehaviour
-{
+public class RePosition : MonoBehaviour {
     Collider2D coll;
 
-    void Awake()
-    {
+    private void Awake() {
         coll = GetComponent<Collider2D>();
     }
-    private void OnTriggerExit2D(Collider2D collider2D)
-    {
+
+    private void OnTriggerExit2D(Collider2D collider2D) {
         if (!collider2D.CompareTag("Area")) return;
-        
+
         Vector3 playerPos = GameManager.instance.player.transform.position;
         Vector3 myPos = transform.position;
         float diffX = Mathf.Abs(playerPos.x - myPos.x);
@@ -22,23 +20,22 @@ public class RePosition : MonoBehaviour
         float dirX = playerDir.x < 0 ? -1 : 1;
         float dirY = playerDir.y < 0 ? -1 : 1;
 
-        switch (transform.tag) 
-        {
+        switch (transform.tag) {
             case "Ground":
                 if (diffX > diffY) {
                     transform.Translate(Vector3.right * dirX * 40);
                 }
                 else if (diffX < diffY) {
                     transform.Translate(Vector3.up * dirY * 40);
-                } 
+                }
+
                 break;
             case "Enemy":
                 if (coll.enabled) {
-                    transform.Translate(playerDir * 20 + new Vector3(Random.Range(-3f, -3f), Random.Range(-3f, -3f),0));
+                    transform.Translate(playerDir * 20 + new Vector3(Random.Range(-3f, -3f), Random.Range(-3f, -3f), 0));
                 }
-                
+
                 break;
         }
-
     }
 }
