@@ -1,5 +1,3 @@
-using System;
-using Unity.Cinemachine;
 using UnityEngine;
 
 public class Bullet : MonoBehaviour {
@@ -28,24 +26,23 @@ public class Bullet : MonoBehaviour {
         this.damage = damage;
         this.per = per;
 
-        if (per > -1) {
+        if (per >= 0) {
             rigid.linearVelocity = dir * 15f;
         }
     }
 
     void OnTriggerEnter2D(Collider2D collision) {
-        if (!collision.CompareTag("Enemy") || per == -1) return;
+        if (!collision.CompareTag("Enemy") || per == -100) return;
         per--;
-        if (per == -1) {
+        
+        if (per < 0) {
             rigid.linearVelocity = Vector2.zero;
             gameObject.SetActive(false);
         }
     }
 
     private void OnTriggerExit2D(Collider2D other) {
-        if (other.CompareTag("Area")) {
-            rigid.linearVelocity = Vector2.zero;
-            gameObject.SetActive(false);
-        }
+        if (!other.CompareTag("Area") || per == -100) return;
+        gameObject.SetActive(false);
     }
 }

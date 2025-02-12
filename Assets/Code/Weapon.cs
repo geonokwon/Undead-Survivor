@@ -15,6 +15,7 @@ public class Weapon : MonoBehaviour {
     }
 
     private void Update() {
+        if (!GameManager.instance.isLive) return;
         switch (id) {
             case 0:
                 transform.Rotate(Vector3.back * speed * Time.deltaTime);
@@ -36,7 +37,7 @@ public class Weapon : MonoBehaviour {
     }
 
     public void LevelUp(float damage, int count) {
-        this.damage = damage;
+        this.damage = damage * Charactor.Damage;
         this.count += count;
         if (id == 0) Batch();
         player.BroadcastMessage("ApplyGear", SendMessageOptions.DontRequireReceiver);
@@ -51,8 +52,8 @@ public class Weapon : MonoBehaviour {
 
         //Property Set
         id = data.itemID;
-        damage = data.baseDamage;
-        count = data.baseCount;
+        damage = data.baseDamage * Charactor.Damage;
+        count = data.baseCount + Charactor.Count;
 
         for (int i = 0; i < GameManager.instance.pool.prefabs.Length; i++) {
             if (data.projectile == GameManager.instance.pool.prefabs[i]) {
@@ -63,11 +64,11 @@ public class Weapon : MonoBehaviour {
 
         switch (id) {
             case 0:
-                speed = 150;
+                speed = 150 * Charactor.WeaponSpeed;
                 Batch();
                 break;
             default:
-                speed = 0.4f;
+                speed = 0.5f * Charactor.WeaponRate;
                 break;
         }
         
@@ -97,7 +98,7 @@ public class Weapon : MonoBehaviour {
             bullet.Rotate(rotVec);
             bullet.Translate(bullet.up * 1.5f, Space.World);
 
-            bullet.GetComponent<Bullet>().Init(damage, -1, Vector3.zero); // -1 is Infinity Per.
+            bullet.GetComponent<Bullet>().Init(damage, -100, Vector3.zero); // -1 is Infinity Per.
         }
     }
 
@@ -112,5 +113,7 @@ public class Weapon : MonoBehaviour {
         bullet.position = transform.position;
         bullet.rotation = Quaternion.FromToRotation(Vector3.up, dir);
         bullet.GetComponent<Bullet>().Init(damage, count, dir);
+        
+        AudioManger.instance.PlaySfx(AudioManger.Sfx.Range);
     }
 }

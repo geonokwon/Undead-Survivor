@@ -10,6 +10,8 @@ public class Item : MonoBehaviour {
 
     private Image icon;
     private Text textLevel;
+    private Text textName;
+    private Text textDesc;
 
     private void Awake() {
         icon = GetComponentsInChildren<Image>()[1];
@@ -17,10 +19,27 @@ public class Item : MonoBehaviour {
 
         Text[] texts = GetComponentsInChildren<Text>();
         textLevel = texts[0];
+        textName = texts[1];
+        textDesc = texts[2];
+        textName.text = data.itemName;
     }
 
-    private void LateUpdate() {
+    void OnEnable() {
         textLevel.text = "Lv." + (level + 1);
+
+        switch (data.itemType) {
+            case ItemData.ItemType.Melee:
+            case ItemData.ItemType.Range:
+                textDesc.text = string.Format(data.itemDescription, data.damages[level] * 100, data.counts[level]);
+                break;
+            case ItemData.ItemType.Glove:
+            case ItemData.ItemType.Shoe:
+                textDesc.text = string.Format(data.itemDescription, data.damages[level] * 100);
+                break;
+            default:
+                textDesc.text = string.Format(data.itemDescription);
+                break;
+        }
     }
 
     public void OnClick() {
@@ -41,6 +60,7 @@ public class Item : MonoBehaviour {
 
                     weapon.LevelUp(nextDamage, nextCount);
                 }
+
                 level++;
                 break;
             case ItemData.ItemType.Glove:
@@ -54,6 +74,7 @@ public class Item : MonoBehaviour {
                     float nextRate = data.damages[level];
                     gear.LevelUp(nextRate);
                 }
+
                 level++;
                 break;
             case ItemData.ItemType.Heal:
@@ -61,7 +82,7 @@ public class Item : MonoBehaviour {
                 break;
         }
 
-        
+
         if (level == data.damages.Length) {
             GetComponent<Button>().interactable = false;
         }

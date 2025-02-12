@@ -1,7 +1,5 @@
 using System.Collections;
-using UnityEditor.Experimental;
 using UnityEngine;
-using UnityEngine.UI;
 
 public class Enemy : MonoBehaviour {
     public Spawner spawner;
@@ -28,6 +26,8 @@ public class Enemy : MonoBehaviour {
     }
 
     private void FixedUpdate() {
+        if (!GameManager.instance.isLive) return;
+        
         if (!isLive || animator.GetCurrentAnimatorStateInfo(0).IsName("Hit")) return;
 
         Vector2 dirVec = target.position - rigid.position;
@@ -37,6 +37,7 @@ public class Enemy : MonoBehaviour {
     }
 
     private void LateUpdate() {
+        if (!GameManager.instance.isLive) return;
         sprite.flipX = target.position.x < rigid.position.x;
     }
 
@@ -68,6 +69,7 @@ public class Enemy : MonoBehaviour {
         if (health > 0) {
             // .. Live, Hit Action
             animator.SetTrigger("Hit");
+            AudioManger.instance.PlaySfx(AudioManger.Sfx.Hit);
         }
         else {
             // .. Die
@@ -78,6 +80,9 @@ public class Enemy : MonoBehaviour {
             animator.SetBool("Dead", true);
             GameManager.instance.kill++;
             GameManager.instance.GetExp();
+            if (GameManager.instance.isLive) 
+                AudioManger.instance.PlaySfx(AudioManger.Sfx.Dead);
+            
         }
     }
 
